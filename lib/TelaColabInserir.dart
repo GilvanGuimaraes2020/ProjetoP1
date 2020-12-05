@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -10,231 +11,153 @@ class ColabAddFalha extends StatefulWidget {
 
 class _ColabAddFalhaState extends State<ColabAddFalha> {
 
+var db = FirebaseFirestore.instance;
+ var scanKey = GlobalKey<ScaffoldState>();
+ String dropDown = 'Box1';
+   //String equipamento = ModalRoute.of(context).settings.arguments;
+   var t1 = TextEditingController();
+    var t2 = TextEditingController();
+   var t3 = TextEditingController();
+   var t4 = TextEditingController();
+   var t5 = TextEditingController();
+   //var t6 = TextEditingController(); 
+  
+void getDados(Map dados){
+ t1.text = dados['equipamento'];
+ t2.text = dados ['codigo'];
+
+}
+
+void limparCampos(){
+ t1.text = '';
+ t2.text = '';
+ t3.text = '';
+ t4.text = '';
+ t5.text = '';
+}
+
   
   @override
   Widget build(BuildContext context) {
 
-    var scanKey = GlobalKey<ScaffoldState>();
-   String equipamento = ModalRoute.of(context).settings.arguments;
-  // var t1 = TextEditingController();
-   var t2 = TextEditingController();
-   var t3 = TextEditingController();
-   var t4 = TextEditingController();
-   var t5 = TextEditingController();
-   var t6 = TextEditingController();
-   var dados = Map();
+   
 
+   Map dados = ModalRoute.of(context).settings.arguments;
 
-
+  if (dados != null){
+    getDados(dados);
+  }
+  
     return Scaffold(
       appBar: AppBar(title: Text("Identificar Falhas"),),
       key: scanKey,
-      body: Column(
-      children: [
-        SizedBox(height: 20,),
-        Row(
-           children: [
-            Container(
-              width: 200,
-              child: Text("Equipamento: ", style: TextStyle(fontSize: 20),)) ,
-             Expanded(child: Container(
-                child:
-                 Center(
-                   child: Container(
-                    
-                     width: 200,
-                     child: Center(child: Text("Data ocorrencia: " , style: TextStyle(fontSize: 20),))),
-                 ),)),
-             Container(
-               
-               width: 200,
-               child: Center(child: Text("Setor: ", style: TextStyle(fontSize: 20),)),
-             )
+      body: Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+        children: [
 
-          ],
-        ),
+Text("Equipamento", style: TextStyle(fontSize: 20),),
+TextField(
+decoration: InputDecoration(
+  border: OutlineInputBorder(borderSide: BorderSide() ),
+),
+controller: t1,
+enabled:  false,
+),
+SizedBox(height: 20,),
+Text("Codigo", style: TextStyle(fontSize: 20),),
+TextField(
+decoration: InputDecoration(
+  border: OutlineInputBorder(borderSide: BorderSide() ),
+),
+controller: t2,
+enabled:  false,
+),
+SizedBox(height: 20,),
+Text("Codigo Peça", style: TextStyle(fontSize: 20),),
+TextField(
+decoration: InputDecoration(
+  border: OutlineInputBorder(borderSide: BorderSide() ),
+),
+controller: t3,
+),
+SizedBox(height: 20,),
+Text("Descriçao da falha", style: TextStyle(fontSize: 20),),
+TextField(
+decoration: InputDecoration(
+  border: OutlineInputBorder(borderSide: BorderSide() ),
+),
+controller: t4,
+),
+SizedBox(height: 20,),
+Text("Identificaçao do Box", style: TextStyle(fontSize: 20),),
+/* TextField(
+decoration: InputDecoration(
+  border: OutlineInputBorder(borderSide: BorderSide() ),
+),
+controller: t5,
+), */
 
-        
-        Row(
-          children: [
-            Container(
-              width: 200,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide( width: 1)
-                )
-              ),
-              child: TextField(
-               // controller: t1,
+ DropdownButton<String>(
+                value: dropDown,
+                items: <String>['Box1' , 'Box2', 'Box3', 'Box4','Box5','Box6','Box7' ]
+                .map<DropdownMenuItem <String>>((String value){
+                  return DropdownMenuItem <String>(
+                    value: value,
+                    child: Text(
+                      value , style: TextStyle(fontSize: 24),
+                    ));
+                } ).toList(), 
+                             
+                onChanged: (String newValue){
+                  setState(() {
+                    dropDown = newValue;
+                    print(dropDown);
+                  });
+                }),
+ SizedBox(height: 20,),
+RaisedButton(
+            onPressed: () async{
 
-               decoration: InputDecoration(
-                 labelText: equipamento,
-                 labelStyle: TextStyle(fontSize: 20)
-               ),
-               enabled: false,
-              )
-              
-              )  ,
+           if(t1.text != '' && t2.text != '' && t3.text != '' &&
+           t4.text != '' ) {
+              await db.collection('falhas').add({
+                
+                'codEquip' : t2.text,
+                'codPeca' : t3.text,
+                'descricao' : t4.text,
+                'dpEngenharia' : '',
+                'dpQualidade' : '',
+                'idBox' : dropDown,
+                'status' : '0',
+                'usuario' : dados['usuario'],
 
-           Expanded(child: Container(
-                child:
-                 Center(
-                   child: Container(
-                     decoration: BoxDecoration(
-                       border: Border(
-                         bottom: BorderSide(width: 1)
-                       )
-                     ),
-                     width: 200,
-                     child: TextField(
-                       controller: t2,
-                       decoration: InputDecoration(
-                         labelStyle: TextStyle(fontSize: 20)
-                       ),
-                     )
-                     ),
-                 ),)),
+              });
 
-              Container(
-               
-               decoration: BoxDecoration(
-                 border: Border(
-                   bottom: BorderSide(width: 1)
-                 )
-               ),
-               width: 200,
-               child: TextField(
-                 controller: t3,
-                 decoration: InputDecoration(
-                   labelStyle: TextStyle(fontSize: 20)
-                 ),
-               ),
-             ) 
+              limparCampos();
 
-          ],
-        ),
+           }   else{
+             return showDialog( context:  context,
+             builder: (context){
+               return AlertDialog(
+                 title: Text("Erro!!!"),
+                 content: Text("Os Campos devem ser preenchidos!!!"),
+               );
+             });
+           }
+             
+            } ,
+            child: Text("Salvar Dados" , style: TextStyle(fontSize: 20),),
 
-        SizedBox(height: 40),
-
-        Row(
-          children: [
-            Container(
-              width: 200,
-              child: Text("Conjunto: ", style: TextStyle(fontSize: 20),)) ,
-             Expanded(child: Container(
-                child:
-                 Center(
-                   child: Container(
-                    
-                     width: 200,
-                     child: Center(child: Text("Descriçao: " , style: TextStyle(fontSize: 20),))),
-                 ),)),
-             Container(
-               
-               width: 200,
-               child: Center(child: Text("Codigo Operador: ", style: TextStyle(fontSize: 20),)),
-             )
-
-          ],
-        ),
-
-        
-
-      Row(
-         children: [
-            Container(
-              width: 200,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide( width: 1)
-                )
-              ),
-              child: TextField(
-                controller: t4,
-               decoration: InputDecoration(
-                 
-                 labelStyle: TextStyle(fontSize: 20)
-               ),
-               
-              )
-              
-              )  ,
-
-           Expanded(child: Container(
-                child:
-                 Center(
-                   child: Container(
-                     decoration: BoxDecoration(
-                       border: Border(
-                         bottom: BorderSide(width: 1)
-                       )
-                     ),
-                     width: 200,
-                     child: TextField(
-                       controller: t5,
-                       decoration: InputDecoration(
-                         labelStyle: TextStyle(fontSize: 20)
-                       ),
-                     )
-                     ),
-                 ),)),
-
-              Container(
-               
-               decoration: BoxDecoration(
-                 border: Border(
-                   bottom: BorderSide(width: 1)
-                 )
-               ),
-               width: 200,
-               child: TextField(
-                 controller: t6,
-                 decoration: InputDecoration(
-                   labelStyle: TextStyle(fontSize: 20)
-                 ),
-               ),
-             ) 
-
-          ],
-        ),
-
-        SizedBox(height: 50),
-
-     
-
-        RaisedButton(
-          onPressed: (){
-            setState(() {
-              dados['equipamento'] = equipamento;
-              dados['data'] = t2.text;
-              dados['setor'] = t3.text;
-              dados['conjunto'] = t4.text;
-              dados['descricao'] = t5.text;
-              dados['codigo'] = t6.text;
-
- scanKey.currentState.showSnackBar(
-   SnackBar(content: Text("Salvo com sucesso"),
-   duration: Duration(seconds: 3),)
- );
-
- 
-              print(dados['equipamento']);
-              print(dados['data']);              
-              print(dados['setor']);
-              print(dados['conjunto']);
-              print(dados['descricao']);
-              print(dados['codigo']);
-              Navigator.pushNamed(context, '/telaEngenharia' ,  arguments: dados);
-            });
-          } ,
-          child: Text("Salvar Dados" , style: TextStyle(fontSize: 20),),
-
+            
+            )
+        ],
           
-          )
 
-      ],
-        
+        ),
       ),
+      backgroundColor: Colors.brown[100],
     );
+
   }
 }

@@ -1,5 +1,10 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'UsuariosList.dart';
 
 class TelaMonitorEng extends StatefulWidget {
   @override
@@ -8,106 +13,92 @@ class TelaMonitorEng extends StatefulWidget {
 
 class _TelaMonitorEngState extends State<TelaMonitorEng> {
 
+ bool valcheck = false;
+  bool valcheck1 = false;
+  bool valcheck2 = false;
+  
 
+  List<Falhas> falhas = List();
+  
+  var db = FirebaseFirestore.instance;
 
+  StreamSubscription<QuerySnapshot> ouvidor;
 
-var scaffoldKey = GlobalKey<ScaffoldState>();
-var addEquipamento = TextEditingController();
+  @override
+  void initState(){
+    super.initState();
 
-var equipamento = List<String>();
-@override 
-void initState (){
-equipamento.add('VTX5022');
-equipamento.add('VTX3515');
-equipamento.add('PTX7010');
-  super.initState();
-}
+    ouvidor?.cancel();
+
+   ouvidor = db.collection('falhas').where('status' , isEqualTo: "1").snapshots().listen((res) {
+   
+   setState(() {
+      falhas = res.docs.map((e) => Falhas.fromMap(e.data(), e.id)).toList() ;
+   });
+    
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {
+    Map dados = ModalRoute.of(context).settings.arguments;
+
+
     return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        title: Text("Nome do engenheiro"),
-
-      ),
-
+      appBar: AppBar(title: Text("Equipamento " ),),
       body:
-      
-       Container(
-         padding: EdgeInsets.all(40),
-        
-         child: Column(
-           children: [
-             Row(
-               children: [
-                  Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: addEquipamento,
-                    decoration: InputDecoration(
-                      labelText: 'Adicionar tarefa',
-                    ),
-                  ),
-                ),
 
-                SizedBox(width: 30),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: (){
-                    setState(() {
-                      equipamento.add(addEquipamento.text);
-                      addEquipamento.text = '';
-                      
-                    });
-                  },
-                )
-              ],
-            ),
-            SizedBox(height: 30,),
-                 Expanded(
-                                    child: ListView.separated(
+Column(
+  children: [
+    Container(
+      child: Center(child: Text("Falhas encontradas", style: TextStyle(fontSize: 20),)),
+    ),
+        Expanded(
+                  child: ListView.builder(    
+    
+      itemCount: falhas.length,
+    
+      itemBuilder: (context , index){
+    
+          return ListTile(
+    
+              title: Text("Codigo: ${falhas[index].codE} - ${dados['equipamento']}", style: TextStyle(fontSize: 20),),
+    
+              subtitle: Text("Descriçao: ${falhas[index].descricao}", style: TextStyle(fontSize: 18),),
 
-                   
-                          itemBuilder: (context,index){
-                            return Container(
-                              child: ListTile(
-                                leading: Icon(Icons.slideshow_outlined),
-                                title: Text(equipamento[index], style: TextStyle(fontSize: 24)),
-                                trailing: IconButton(
-                                  icon: Icon(Icons.delete_outline),
-                                  onPressed: (){
-                                    setState(() {
-                                      equipamento.removeAt(index);
+              trailing: IconButton(
+              icon: Icon(Icons.fact_check),
+              tooltip: 'Açoes', 
+              onPressed: (){
+                dados['id'] = falhas[index].id;
+                dados['descricao'] = falhas[index].descricao;
+                dados['setor'] = falhas[index].idBox;
+                dados['peca'] = falhas[index].codP;
+                Navigator.pushNamed(context, '/telaEngenharia', arguments: dados);
+              }, ),
 
-                                      scaffoldKey.currentState.showSnackBar(
-                              SnackBar(
-                                content: Text('Tarefa removida com sucesso.'),
-                                duration: Duration(seconds: 3),
-                              ),
-                            );  
 
-                                    });
-                                  },
-                                ),
-                              ),
-                            );
-                          },
+          );
+    
+      },
+    
+    ),
+        ),
+  ],
+),
 
-                          separatorBuilder: (context, index){
-                            return Divider(thickness: 1, color: Colors.grey);
-                          },
 
-                          itemCount: equipamento.length
 
-                        ),
-                 ),
-               ],
-             ),
-           ],
-         ),
-       ),
+    
+    );
+  }
+  Widget btnOk(){
+    return FlatButton(
+      child: Text("ok"),
+      onPressed: (){
+      //  Navigator.of(context).pop();
+      },
     );
   }
 }

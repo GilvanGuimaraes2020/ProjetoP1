@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:projeto_p1_2/TelaLogin.dart';
+//import 'package:projeto_p1_2/TelaLogin.dart';
 import 'package:projeto_p1_2/TelaSobre.dart';
 
 class TelaInicial extends StatefulWidget {
@@ -15,7 +15,7 @@ class _TelaInicialState extends State<TelaInicial> {
 
 String funcao;
 
-void salvar(String funcao){
+/*void salvar(String funcao){
 
   
 setState(() {
@@ -26,7 +26,7 @@ setState(() {
 });
   
 }
-
+*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +35,31 @@ setState(() {
         Text('Monitoramento de Produção',
         style: TextStyle( fontSize: 25, fontStyle: FontStyle.italic,),),),
          backgroundColor: Colors.purple,
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.agriculture,
+                 color: Colors.white,
+                
+                size: 30
+              ),
+              tooltip: 'listar equipamentos',
+              onPressed: (){
+                Navigator.pushNamed(context, '/telaShowEquipamento');
+              },
+            ), 
+            SizedBox(width: 10,),
+            IconButton(
+              icon: Icon(                
+                Icons.supervised_user_circle,
+                color: Colors.white,
+                size: 30,) , 
+                tooltip: 'inserir usuario',
+              onPressed: (){
+                Navigator.pushNamed(context, '/telaCadastro');
+              })
 
+          ],
         ),
 
         /*
@@ -45,63 +69,72 @@ setState(() {
          
           child: Scaffold(
             appBar: AppBar(
-              title: Text('Escolher Login'),
+              title: Text('MENU'),
 
             ),
             body: Container(
-              color: Colors.blue[100],
-              child: ListView(
-                children:<Widget> [
+              width: double.infinity,
+                  color: Colors.blue[100],
+                  child: TextButton(
+                    
+                    child: Text("Login"),
+                    onPressed: (){
+                      Navigator.pushNamed(context, '/telaLogin');
+                    },
+                  )
+                 /*   ListView(
+                    children:<Widget> [
 
-                  // tela do login da engenharia
-                  Expanded(
-                                  child: new Container(
-                      child: TextButton(
-                        child: Text('Engenharia'),
-                        
-                        onPressed: (){
-                          funcao = 'Engenharia';
-                          salvar(funcao);
-                        } ,
-                      ),
-                      color: Colors.black,
-                    ),
-                  ),
-
-                  // Tela de login dos colaboradores
-                Expanded(
-                                  child: new Container(
-                      child: TextButton(
-                        child: Text('Colaborador'),
-                        onPressed: (){
-                          funcao = 'Colaborador';
-                          salvar(funcao);
-                        } ,
-                      ),
-                      color: Colors.black,
-                    ),
-                  ),
-
-                   // Tela de login da qualidade
-                Expanded(
-                                  child: new Container(
-                      child: TextButton(
-
-                        child: Text('Qualidade'),
-
-                        onPressed: (){
-                          funcao = 'Qualidade';
-                          salvar(funcao);
-                        } ,
-                      ),
-                      color: Colors.black,
-                    ),
-                  ),
-
-
-                ],
-              ),
+                      // tela do login da engenharia
+                      Expanded(
+                        child: new Container(
+            child: TextButton(
+              child: Text('Engenharia'),
+              
+              onPressed: (){
+                funcao = 'Engenharia';
+                salvar(funcao);
+              } ,
             ),
+            color: Colors.black,
+                        ),
+                      ),
+
+                      // Tela de login dos colaboradores
+                    Expanded(
+                        child: new Container(
+            child: TextButton(
+              child: Text('Colaborador'),
+              onPressed: (){
+                funcao = 'Colaborador';
+                salvar(funcao);
+              } ,
+            ),
+            color: Colors.black,
+                        ),
+                      ),
+
+                       // Tela de login da qualidade
+                    Expanded(
+                        child: new Container(
+            child: TextButton(
+
+              child: Text('Qualidade'),
+
+              onPressed: (){
+                funcao = 'Qualidade';
+                salvar(funcao);
+              } ,
+            ),
+            color: Colors.black,
+                        ),
+                      ),
+
+
+                    ],
+                  ), 
+                  */
+                ),
           ),
         ),
         

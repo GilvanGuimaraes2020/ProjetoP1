@@ -1,218 +1,196 @@
+import 'dart:async';
 
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:projeto_p1_2/TelaListEquip.dart';
-//import 'package:projeto_p1_2/TelaMonitorEng.dart';
+//import 'package:projeto_p1_2/TelaListEquip.dart';
 
+import 'TelaListEquip.dart';
+import 'UsuariosList.dart';
 
-
-
-
-// ignore: must_be_immutable
 class TelaLogin extends StatefulWidget {
-  var funcao;
-
-
-TelaLogin(this.funcao);
-
-
   @override
   _TelaLoginState createState() => _TelaLoginState();
 }
 
-
 class _TelaLoginState extends State<TelaLogin> {
 
 
- var controlUser =TextEditingController();
-var controlPass = TextEditingController();
-var validarUser = GlobalKey<FormState>();
-var validarPass = GlobalKey<FormState>();
-String funcao;
-String usuario;
-bool verUsuario;
-List<String> listEng = ['Daniel.Souza' , 'Carlos.Silva'];
-List<String> listColab = ['Paulo.Souza' , 'Marcos.Silva'];
-List<String> listQaul = ['Gilvan.Guimaraes'];
+  var usuario = TextEditingController();
+  var senhaUser = TextEditingController();
+  var db = FirebaseFirestore.instance;
+  bool userAcess = false;
+  String userPass;
+  String funcao;
 
-void salvar(String funcao){
-setState(() {
-  //Utilizando mesma senha para todos para otimizar
-  usuario = controlUser.text;
-  if(funcao == "Engenharia"){
-    if (listEng.contains(usuario) && controlPass.text == '123')
-       endereco();
-    else 
-    alerta();
-  } else if (funcao == "Colaborador"){
-    if (listColab.contains(usuario) && controlPass.text == '123')
-       endereco();
-    else 
-    alerta();
-  } else if (funcao == "Qualidade"){
-    if (listQaul.contains(usuario) && controlPass.text == '123')
-       endereco();
-    else
-    alerta();
-  } 
-    }
-     );
-}
+  List<Usuarios> usuarios = List();
 
- void endereco(){
-       Navigator.push(context, MaterialPageRoute(
-                          builder: (context) => TelaListEquip(funcao , usuario) ));
-    }    
+  StreamSubscription<QuerySnapshot> ouvidor;
+ 
+ @override
+  void initState(){
+    super.initState();
 
- void alerta(){
-  showDialog(
-    context: context,
-     builder: (context){
-     return AlertDialog(
-     title: Text('Usuario ou senha errada'),
-     content: Text("entrar novamente"),
- );
- }
-  ); 
- }
+    //Registrar o "ouvidor" para monitorar qualquer tipo de alteração
+    //na coleção Usuarios do FireStore
+    ouvidor?.cancel();
+
+    ouvidor = db.collection("usuarios").snapshots().listen( (res) {
+
+      setState(() {
+        usuarios = res.docs.map((e) => Usuarios.fromMap(e.data(), e.id)).toList();
+      });
+
+    });
+
+
+  }
   @override
   Widget build(BuildContext context) {
-    Future <bool> onWillPop(){
-      return showDialog<bool>(context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text('Deseja Sair?'),
-        actions: <Widget> [
-          RaisedButton(
-            child: Text('Ok'),
-            onPressed: (){
-              Navigator.pop(context , true);
-          }),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Login"),
+      ),
 
-          RaisedButton(
-            child: Text('Cancelar'),
-            onPressed: (){
-              Navigator.pop(context , false);
-            })
-        ],
-      )
-      );
-    }
-    return WillPopScope(onWillPop: onWillPop ,
-          child: Scaffold(
-        appBar: AppBar(
-          title: Center(child: Text('Login ' + widget.funcao )),          
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-             onPressed: (){
-              Navigator.maybePop(context);
-             }),
-          
-        ),
-        body: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-                  child: Container(
-            
-            padding: EdgeInsets.all(20),
-            color: Colors.blue[100],
-            child: Column(
-              children: [
-                 // Imagem
-                
-                Container(
-
-                  
-                  padding: EdgeInsets.all(20),
-                  child: ClipRRect(
+      body: Container(
+        child: Column(
+          children: [
+            Container(
+              
+              child: ClipRRect(
 
                      borderRadius: BorderRadius.circular(10),
   
-          child: Image.asset('images/' + widget.funcao +'.jpg', scale: 2,))
-      
-                  ),
-                     
-            
-                // usuario
-                Container(
-                  padding: EdgeInsets.all(20),
-                  child: TextFormField(
-                    key: validarUser,
-                    
-                    decoration: InputDecoration(
-                      labelText: 'Usuario',
-                      labelStyle: TextStyle(color: Colors.white),
-                      icon: Icon(Icons.person),
-                    ),
-                    controller: controlUser ,
-                     onChanged: (usuario) {
-                       if ((listEng.contains(usuario) && widget.funcao == "Engenharia" )||
-                       (listQaul.contains(usuario) && widget.funcao == "Qualidade" )||
-                       (listColab.contains(usuario) && widget.funcao == "Colaborador")){
-                         print(usuario);
-                         verUsuario = true;
-                       } else{
-                         verUsuario = false;
-                       }
-                      
-                    }, 
-                  ),
-                ),
+          child: 
+          funcao ==null ?
+          Image.asset('images/UsuarioX.jpg', scale: 2,) :
+          Image.asset('images/' + funcao + '.jpg', scale:2)
+          
+   ) ),
 
-                // campo da senha
-                Container(
-                  padding: EdgeInsets.all(20),
-                  child: TextFormField(
-                   obscureText: true,
-                    decoration: InputDecoration(                    
-                      labelText: 'Senha',
-                      labelStyle: TextStyle(color: Colors.white),
-                      icon: Icon(Icons.lock),
+            TextField(
+              decoration: InputDecoration(
+                labelText: "usuario",     
+                
+                ),
+                controller: usuario,
+                onChanged: (user){
+                 print(user);
+                 for (int i = 0; i<usuarios.length; i++){
+                      if (usuarios[i].nome.contains(usuario.text)) {
+                                          print("encontrou " + usuario.text);
+                                        } else{
+                                          print(usuarios[i].nome);
+                                        }
+
+                 }
+                 
+                 
+                  
+                },
+
+              ),
+              SizedBox(height: 20,),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: "Senha",
+
+                ),
+                controller: senhaUser,
+                obscureText: true,
+                onTap: (){
+                  setState(() {
+                     for (int i = 0; i<usuarios.length; i++){
+                      if (usuarios[i].nome.contains(usuario.text)) {
+
+                        userAcess = true;  
+                        userPass = usuarios[i].senha;
+                        funcao = usuarios[i].setor;                                                          
+                                        }
+                 }
+                  });
+                   
+                 if (userAcess == false){
+                     showDialog(context: context,
+                                       builder: (context){
+                                         return AlertDialog(
+                                            title: Text("Usuario nao cadastrado"),
+                                         );
+                                       });
+                 }
+                 print(userPass + " " + funcao);
+
+                 },
+                
+                
+              ),
+              SizedBox(height: 20,     ),
+             
+              Align(
+                alignment: Alignment.center,
+                              child: Row(
+                  children: [
+                    RaisedButton(
+                      child: Text("Entrar"),
+                      onPressed: (){
+                         setState(() {
+                          if (userPass == senhaUser.text){
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => TelaListEquip(funcao, usuario.text)
+                            ));
+                          }
+
+                        });
+                      },
                     ),
-                    key: validarPass,
-                    controller: controlPass,
-                    onTap: (){
-                      if (verUsuario == false){
-                        showDialog(context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Usuario nao cadastrado'),
-                            content: Text('Cadastrar Usuario'),
-                          );
-                        }
-                        );
+                    SizedBox(width: 50,),
+                    RaisedButton(
+                      child: Text("Sair"),
+                      onPressed: (){
+                        bool controlOut = false;
+                       setState(() {
+                         showDialog(
+                           context: context,
+                           builder: (context) {
+                             return AlertDialog(
+                               title: Text("Sair do Login"),
+                               content: Text("Tem Certeza que deseja Sair?"),
+                               actions: [
+                                 FlatButton(
+                                   child: Text("Sim"),
+                                   onPressed: (){
+                                     controlOut = true;
+                                   },
+                                 ),
+                                 FlatButton(
+                                    child: Text("Não"),
+                                   onPressed: (){
+                                     controlOut = false;
+                                   },
+                                 )
+
+                               ],
+                                
+                             );
+                           },
+                         );
+                         
+                       });
+                      if (controlOut == true){
+                        Navigator.of(context).pop();
                       }
                     },
-                    
-                  ),
+                    )
+                  ],
                 ),
-                Container(
-                  padding: EdgeInsets.all(20),
-                  margin: EdgeInsets.all(10),
-                  child: RaisedButton(
-                    child: Text('Entrar' , style: TextStyle(color: Colors.white),),
-                    color: Colors.black12,
-                    onPressed: (){
-                      funcao = widget.funcao;
-                      
-                      salvar(funcao);
-                      },
-
-                      ),
-                     
-                  ),
-                    
-                
-              ],
-
-            ),
-          ),
+              )
+          ],
+            )
+          
         ),
-        
-        
-      ),
+
+      
+      backgroundColor: Colors.brown[200],
     );
   }
-
 }
-

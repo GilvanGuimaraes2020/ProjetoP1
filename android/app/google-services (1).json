@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "733740612060",
+    "firebase_url": "https://controle-falhas.firebaseio.com",
+    "project_id": "controle-falhas",
+    "storage_bucket": "controle-falhas.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733740612060:android:d51b6a881ee1dc6cdaf719",
+        "android_client_info": {
+          "package_name": "com.example.projeto_p1_2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "733740612060-i65p1plnku21hpfvj521dctrnos0kfl1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLLRs4S8RDPFd2ZZ57d5uO6aDBkWMN1kU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "733740612060-i65p1plnku21hpfvj521dctrnos0kfl1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
